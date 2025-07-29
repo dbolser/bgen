@@ -919,7 +919,7 @@ private:
 			case 4: dps = 3; break ;
 			case 8: dps = 4; break ;
 		}
-		int const valueSize = 3 + 3 + 3*(dps+((dps>0)?2:1)) ;
+               std::size_t const valueSize = 3 + 3 + 3*(dps + ((dps>0)?2:1)) ;
 		std::size_t const numberOfDistinctProbs = 1 << bits ;
 		uint16_t const maxProb = numberOfDistinctProbs - 1 ;
 
@@ -949,7 +949,7 @@ private:
 				std::size_t storageIndex = key * valueSize ;
 				formatter << gt << ":" << p0 << "," << p1 << "," << p2 ; 
 				std::string const value = formatter.str() ;
-				assert( value.size() == valueSize ) ;
+                               assert( value.size() == valueSize ) ;
 				std::copy( value.begin(), value.end(), &storage[0] + storageIndex ) ;
 			}
 		}
