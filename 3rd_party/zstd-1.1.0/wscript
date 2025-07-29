@@ -18,7 +18,7 @@ def build( bld ):
 		name = 'zstd',
 		target = 'zstd',
 		source = sources,
-		cflags = '-fPIC',
+               cflags = '-fPIC -w',
 		includes = [ 'lib', 'lib/common', 'lib/compress', 'lib/decompress' ],
 		export_includes = 'lib/'
 	)

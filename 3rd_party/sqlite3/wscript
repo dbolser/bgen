@@ -8,7 +8,7 @@ def build( bld ):
 		source = sources,
 		features = [ 'c' ],
 		includes = './',
-		cflags = '-fPIC',
+               cflags = '-fPIC -w',
 		defines = 'SQLITE_ENABLE_COLUMN_METADATA SQLITE_ENABLE_STAT4 SQLITE_MAX_EXPR_DEPTH=10000 SQLITE_USE_URI=1',
 		#uselib = 'DL',
 		export_includes = './'
