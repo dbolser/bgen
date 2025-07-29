@@ -62,7 +62,7 @@ TEST_CASE( "Test probability bound", "[bgen][biallelic][unphased]" ) {
 				writer.set_number_of_entries( 3, 3, genfile::ePerUnorderedGenotype, genfile::eProbability ) ;
 				for( std::size_t k = 0; k < 3; ++k ) {
 					if( k == g ) {
-						REQUIRE_THROWS_AS( writer.set_value( k, 1.0 + error + 2 * epsilon ), genfile::bgen::BGenError ) ;
+                                               REQUIRE_THROWS_AS( writer.set_value( k, 1.0 + error + 2 * epsilon ), genfile::bgen::BGenError const& ) ;
 						break ;
 					} else {
 						REQUIRE_NOTHROW( writer.set_value( k, 0 ) ) ;
@@ -105,7 +105,7 @@ TEST_CASE( "Test probability bound", "[bgen][biallelic][unphased]" ) {
 						REQUIRE_NOTHROW( writer.set_value( k, v ) ) ;
 					} else {
 						// last value will throw.
-						REQUIRE_THROWS_AS(  writer.set_value( k, v ), genfile::bgen::BGenError ) ;
+                                               REQUIRE_THROWS_AS(  writer.set_value( k, v ), genfile::bgen::BGenError const& ) ;
 					}
 				}
 			}
@@ -121,7 +121,7 @@ TEST_CASE( "Test probability bound", "[bgen][biallelic][unphased]" ) {
 						REQUIRE_NOTHROW( writer.set_value( k, v ) ) ;
 					} else {
 						// last value will throw
-						REQUIRE_THROWS_AS( writer.set_value( k, v ), genfile::bgen::BGenError ) ;
+                                               REQUIRE_THROWS_AS( writer.set_value( k, v ), genfile::bgen::BGenError const& ) ;
 					}
 				}
 			}
