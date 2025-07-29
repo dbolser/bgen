@@ -1,3 +1,6 @@
 .waf-1.8.13*
 .waf-2.0.6*
 build
+bgenlib/bin
+*.egg-info
+
