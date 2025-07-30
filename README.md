@@ -180,6 +180,39 @@ we therefore recommend cloning the `release` branch. Code development takes plac
 branch and/or in feature branches branched from the `trunk` branch. The command given above
 downloads the release branch, which is what most people will want.
 
+### Python package and CI
+
+This repository contains a lightweight Python wrapper called `bgenlib`.  The
+package compiles the `bgenix` tool during installation and exposes it as a
+console script.  You can install it directly from PyPI with:
+
+```
+pip install bgenlib
+```
+
+After installation `bgenix` will be available on your `PATH` and can be used as
+normal.
+
+Continuous integration is provided via a GitHub Actions workflow
+(`.github/workflows/ci.yml`) which builds the project, runs the unit tests and
+builds a wheel.  Tagged releases can be uploaded to PyPI using this workflow.
+
+### Publishing to PyPI
+
+1. [Create an account](https://pypi.org/account/register/) on PyPI and
+   generate an API token.
+2. In your GitHub repository settings add the token as a secret called
+   `PYPI_API_TOKEN`.
+3. Tag a release, for example:
+
+   ```bash
+   git tag -a v1.2.3 -m "Release v1.2.3"
+   git push origin v1.2.3
+   ```
+
+When a tag beginning with `v` is pushed, the CI workflow will build the
+package and publish it to PyPI using the provided token.
+
 ### More information
 
 See the [source code](/dir?ci=release), 
