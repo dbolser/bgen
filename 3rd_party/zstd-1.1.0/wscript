@@ -18,7 +18,8 @@ def build( bld ):
 		name = 'zstd',
 		target = 'zstd',
 		source = sources,
-		cflags = '-fPIC',
+		# Vendored code we do not maintain; see the note in ../boost_1_55_0/wscript.
+		cflags = [ '-fPIC', '-w' ],
 		includes = [ 'lib', 'lib/common', 'lib/compress', 'lib/decompress' ],
 		export_includes = 'lib/'
 	)

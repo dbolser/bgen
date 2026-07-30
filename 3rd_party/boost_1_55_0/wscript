@@ -21,5 +21,8 @@ def build( bld ):
 		includes = './',
 		export_includes = './', 
 		uselib = 'ZLIB BZIP2 RT',
-		cxxflags = [ '-std=c++11', '-Wno-unused-local-typedefs', '-Wno-c++11-long-long', '-Wno-keyword-macro', '-Wno-unused-const-variable' ]
+		# Vendored code we do not maintain: silence its warnings rather than
+		# chase individual -Wno- flags, so that warnings from bgen's own
+		# sources are not lost in the noise.
+		cxxflags = [ '-std=c++11', '-w' ]
 	)

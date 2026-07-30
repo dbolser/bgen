@@ -1258,11 +1258,11 @@ namespace genfile {
 							// Consume values and interpret them.
 							double sum = 0.0 ;
 							uint32_t reportedValueCount = 0 ;
-							if( !valueConsumer.check( ploidy * (pack.numberOfAlleles-1) )) {
+							if( !valueConsumer.check( ploidy * (uint32_t( pack.numberOfAlleles )-1) )) {
 								throw BGenError() ;
 							}
 							for( uint32_t hap = 0; hap < ploidy; ++hap ) {
-								for( uint32_t allele = 0; allele < (pack.numberOfAlleles-1); ++allele ) {
+								for( uint32_t allele = 0; allele < (uint32_t( pack.numberOfAlleles )-1); ++allele ) {
 									double const value = valueConsumer.next() ;
 									switch( sample_status ) {
 										case eIgnore: break ;

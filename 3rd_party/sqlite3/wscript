@@ -8,7 +8,8 @@ def build( bld ):
 		source = sources,
 		features = [ 'c' ],
 		includes = './',
-		cflags = '-fPIC',
+		# Vendored code we do not maintain; see the note in ../boost_1_55_0/wscript.
+		cflags = [ '-fPIC', '-w' ],
 		defines = 'SQLITE_ENABLE_COLUMN_METADATA SQLITE_ENABLE_STAT4 SQLITE_MAX_EXPR_DEPTH=10000 SQLITE_USE_URI=1',
 		#uselib = 'DL',
 		export_includes = './'
