@@ -1,6 +1,11 @@
 .waf-1.8.13*
 .waf-2.0.6*
+.waf3-*
+.lock-waf*
 build
-bgenlib/bin
+dist
+bgenix/bin
 *.egg-info
-
+__pycache__/
+.pytest_cache/
+.venv/

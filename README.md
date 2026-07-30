@@ -182,36 +182,92 @@ downloads the release branch, which is what most people will want.
 
 ### Python package and CI
 
-This repository contains a lightweight Python wrapper called `bgenlib`.  The
-package compiles the `bgenix` tool during installation and exposes it as a
-console script.  You can install it directly from PyPI with:
+For people working in pip/uv environments rather than conda, this repository
+packages the `bgenix` tool for PyPI.  Installing it compiles bgenix from the
+sources in this repository and puts it on your `PATH`:
 
 ```
-pip install bgenlib
+pip install bgenix        # or: uv tool install bgenix
 ```
 
-After installation `bgenix` will be available on your `PATH` and can be used as
-normal.
+This needs a C++ compiler and zlib headers (`apt install g++ zlib1g-dev`), the
+same as a plain `./waf` build.  The path to the compiled executable is also
+available to Python callers:
 
-Continuous integration is provided via a GitHub Actions workflow
-(`.github/workflows/ci.yml`) which builds the project, runs the unit tests and
-builds a wheel.  Tagged releases can be uploaded to PyPI using this workflow.
+```python
+from bgenix import bgenix_path
+```
 
-### Publishing to PyPI
+Note that this is a packaging shim, not a BGEN library — it gives you the
+command-line tool and nothing else.  To read BGEN data in Python use one of the
+existing libraries ([`bgen`](https://pypi.org/project/bgen/),
+[`bgen-reader`](https://pypi.org/project/bgen-reader/), `cbgen`, `pybgen`), and
+note that `bgenix` is also available
+[from conda-forge](https://anaconda.org/conda-forge/bgenix).
 
-1. [Create an account](https://pypi.org/account/register/) on PyPI and
-   generate an API token.
-2. In your GitHub repository settings add the token as a secret called
-   `PYPI_API_TOKEN`.
-3. Tag a release, for example:
+#### Tests
 
-   ```bash
-   git tag -a v1.2.3 -m "Release v1.2.3"
-   git push origin v1.2.3
-   ```
+The C++ unit tests are built by waf and run directly:
 
-When a tag beginning with `v` is pushed, the CI workflow will build the
-package and publish it to PyPI using the provided token.
+```
+./waf configure && ./waf && ./build/test/unit/test_bgen
+```
+
+The Python layer is covered by pytest:
+
+```
+pip install '.[test]'
+pytest              # launcher, packaging metadata and bgenix smoke tests
+pytest -m slow      # additionally builds a wheel and an sdist, installs each
+                    # into a scratch virtualenv and runs bgenix from it
+```
+
+#### Continuous integration
+
+`.github/workflows/ci.yml` builds the project, runs both test suites, and
+builds and installs the wheel and the sdist.
+
+#### Releasing to PyPI
+
+`.github/workflows/publish.yml` publishes on a `vX.Y.Z` tag.  It publishes the
+**sdist only**: the wheel contains a compiled binary, and PyPI does not accept
+plain `linux_x86_64` wheels, so binary wheels would have to be built in a
+`manylinux` container (e.g. with `cibuildwheel`) first.  The sdist is what
+makes `pip install bgenix` compile from source.
+
+Before the first release you need a [PyPI trusted
+publisher](https://docs.pypi.org/trusted-publishers/) for this repository and
+a `pypi` environment in the repository settings; the upload step fails without
+them, so nothing can publish by accident.
+
+The version is `<upstream BGEN version>.post<packaging revision>`, which is the
+PEP 440 spelling of Debian's `1.1.7-1` — in fact PEP 440 normalises a literal
+`1.1.7-1` to `1.1.7.post1`.  So `bgenix==1.1.7.post1` is the first packaging of
+BGEN 1.1.7, and it sorts between `1.1.7` and `1.1.8`.  Bump the `.postN` for a
+packaging change or a new local patch; change the part in front of it only when
+upstream does.  `tests/test_packaging.py` enforces that the front part matches
+`VERSION` in `wscript`.
+
+Note that PyPI rejects PEP 440 *local* versions, so `1.1.7+patch1` is not an
+option.  See [PATCHES.md](PATCHES.md) for what this tree carries on top of
+upstream.
+
+#### Keeping up with upstream
+
+Upstream BGEN is a [Fossil repository at
+enkre.net](https://enkre.net/cgi-bin/code/bgen), not GitHub, so there are no
+releases or tags to subscribe to.  `.github/workflows/upstream-check.yml` polls
+it weekly instead: it reads `VERSION` out of the release branch's `wscript` and
+opens an issue if upstream has moved past the version vendored here.  Run the
+same check by hand with:
+
+```
+python scripts/check_upstream_version.py
+```
+
+Fossil's tarball endpoint rate-limits and its timeline RSS feed is broken, so
+the raw-file read is the only reliable signal — the check fails loudly rather
+than silently reporting success if that endpoint stops working too.
 
 ### More information
 

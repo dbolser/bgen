@@ -1,0 +1,24 @@
+# The sdist has to carry everything './waf' needs, because installing from an
+# sdist compiles bgenix from source.  Without this file setuptools ships only
+# the Python modules and the build fails with 'waf: No such file or directory'.
+include waf wscript
+include LICENSE_1_0.txt CHANGELOG.md
+
+recursive-include src *.cpp
+recursive-include genfile *
+recursive-include appcontext *
+recursive-include db *
+recursive-include apps *
+recursive-include 3rd_party *
+
+# The top-level wscript recurses into these, so they must be present, but the
+# example BGEN data (~15M) is not needed to build: take the sources only.
+recursive-include example *.cpp wscript
+recursive-include test *
+recursive-include R wscript
+
+global-exclude *.o *.a *.so *.pyc
+global-exclude .DS_Store
+prune build
+prune dist
+prune 3rd_party/boost_1_55_0/doc

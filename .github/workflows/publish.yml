@@ -1,0 +1,78 @@
+name: Publish
+
+# Publishes the sdist to PyPI when a vX.Y.Z tag is pushed.  Only the sdist:
+# the wheel holds a compiled binary and PyPI rejects plain linux_x86_64 wheels,
+# so binary wheels would have to be built in a manylinux container first.
+#
+# Requires a PyPI trusted publisher for this repository and workflow, and a
+# 'pypi' environment in the repository settings.  Until both exist the upload
+# step fails, which is the intended behaviour: nothing publishes by accident.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and verify the sdist
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ make zlib1g-dev
+          python -m pip install --upgrade pip
+          python -m pip install build pytest setuptools
+
+      - name: Check the tag matches the packaged version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          python - <<'PY'
+          import os, sys, tomllib
+          tag = os.environ['GITHUB_REF_NAME'].removeprefix('v')
+          with open('pyproject.toml', 'rb') as handle:
+              version = tomllib.load(handle)['project']['version']
+          if tag != version:
+              sys.exit('tag %s does not match pyproject version %s' % (tag, version))
+          print('tag and version agree: %s' % version)
+          PY
+
+      # Builds the sdist, installs it into a scratch virtualenv and runs the
+      # bgenix it compiles.  Publishing something that cannot be installed is
+      # the one failure worth spending a couple of minutes to rule out.
+      - name: Verify the sdist installs and runs
+        run: python -m pytest tests/test_sdist.py -m slow
+
+      - name: Build the sdist
+        run: python -m build --sdist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+
+  publish:
+    name: Upload to PyPI
+    needs: build
+    # Tags only.  A workflow_dispatch run skips the tag/version check above, so
+    # without this it would upload whatever branch was selected and burn that
+    # version number -- PyPI does not allow a version to be replaced.  Manual
+    # runs therefore build and verify, and stop short of publishing.
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: sdist
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
