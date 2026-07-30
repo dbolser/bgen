@@ -1,0 +1,62 @@
+name: Upstream check
+
+# Upstream BGEN lives in a Fossil repository at enkre.net, so there is nothing
+# to watch or subscribe to from GitHub.  This polls it instead and opens an
+# issue when the release branch moves past the version vendored here.
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Compare with upstream BGEN
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Read the upstream version
+        id: check
+        # Exits 1 when upstream has moved, which is a result rather than a
+        # failure.  An unreachable endpoint exits 2 and does fail the job:
+        # a watcher that has quietly stopped watching is worse than none.
+        run: |
+          set +e
+          python scripts/check_upstream_version.py
+          status=$?
+          set -e
+          [ $status -le 1 ] || exit $status
+
+      - name: Open an issue when upstream has moved
+        if: steps.check.outputs.status == 'moved'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPSTREAM: ${{ steps.check.outputs.upstream }}
+          LOCAL: ${{ steps.check.outputs.local }}
+        run: |
+          title="Upstream BGEN is at ${UPSTREAM} (this tree vendors ${LOCAL})"
+          if gh issue list --state open --search "in:title Upstream BGEN is at" \
+               --json title --jq '.[].title' | grep -qxF "$title"; then
+            echo "An issue for this version is already open."
+            exit 0
+          fi
+          cat > /tmp/issue-body.md <<EOF
+          The release branch at https://enkre.net/cgi-bin/code/bgen has moved to
+          **${UPSTREAM}**; this repository vendors **${LOCAL}**.
+
+          To update:
+
+          1. Pull the upstream changes into this repository.
+          2. Bump \`VERSION\` in \`wscript\` and \`version\` in \`pyproject.toml\`
+             together — \`tests/test_packaging.py\` enforces that they match.
+          3. Push a \`v${UPSTREAM}\` tag to publish the new sdist to PyPI.
+
+          Raised automatically by \`.github/workflows/upstream-check.yml\`.
+          EOF
+          gh issue create --title "$title" --body-file /tmp/issue-body.md
