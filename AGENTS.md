@@ -7,7 +7,7 @@ this tree carries on top of it.
 
 ## Build
 
-```
+```bash
 ./waf configure
 ./waf
 ```
@@ -19,11 +19,11 @@ Outputs land in `build/`. A full build needs a C++11 compiler and zlib headers
 
 Run both suites after changing code.
 
-```
+```bash
 ./build/test/unit/test_bgen            # C++ unit tests
 ```
 
-```
+```bash
 pip install '.[test]'
 pytest                                 # launcher, packaging, bgenix smoke tests
 pytest -m slow                         # also builds a wheel and an sdist and
@@ -32,7 +32,7 @@ pytest -m slow                         # also builds a wheel and an sdist and
 
 A quick end-to-end check of the tool itself:
 
-```
+```bash
 ./build/apps/bgenix -g example/example.16bits.bgen -list
 ```
 
