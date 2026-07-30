@@ -209,7 +209,7 @@ namespace genfile {
 			// read data up to first data block.
 			m_postheader_data.resize( m_offset+4 - m_stream->tellg() ) ;
 			m_stream->read( reinterpret_cast< char* >( &m_postheader_data[0] ), m_postheader_data.size() ) ;
-			if( m_stream->gcount() != m_postheader_data.size() ) {
+			if( std::size_t( m_stream->gcount() ) != m_postheader_data.size() ) {
 				throw std::invalid_argument(
 					(
 						boost::format(

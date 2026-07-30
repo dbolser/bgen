@@ -8,7 +8,7 @@ name = "bgenix"
 # Debian's 1.1.7-1.  The part before '.post' must match VERSION in ./wscript;
 # tests/test_packaging.py enforces that.  See PATCHES.md for what this tree
 # carries on top of upstream.
-version = "1.1.7.post1"
+version = "1.1.7.post2"
 description = "The bgenix BGEN indexing tool, installable with pip"
 readme = "README.md"
 requires-python = ">=3.9"
