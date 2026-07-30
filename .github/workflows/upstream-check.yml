@@ -55,7 +55,10 @@ jobs:
           1. Pull the upstream changes into this repository.
           2. Bump \`VERSION\` in \`wscript\` and \`version\` in \`pyproject.toml\`
              together — \`tests/test_packaging.py\` enforces that they match.
-          3. Push a \`v${UPSTREAM}\` tag to publish the new sdist to PyPI.
+          3. Tag with a leading \`v\` and the exact \`pyproject.toml\` version to
+             publish the new sdist — \`v${UPSTREAM}.post1\` if you keep the
+             packaging revision, \`v${UPSTREAM}\` only if you drop it.  The
+             publish workflow rejects a tag that does not match.
 
           Raised automatically by \`.github/workflows/upstream-check.yml\`.
           EOF

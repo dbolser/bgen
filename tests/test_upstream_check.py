@@ -70,6 +70,27 @@ def test_an_unreachable_upstream_is_distinct_from_drift(local_version, upstream)
     assert checker.main([]) == checker.EXIT_UNREACHABLE
 
 
+@pytest.mark.parametrize('contents', [None, 'APPNAME = "bgen"\n'])
+def test_an_unreadable_local_wscript_fails_loudly(contents, tmp_path, monkeypatch,
+                                                  upstream):
+    """Missing or malformed, it must not exit 1 and read as 'not moved'.
+
+    Exit 1 with no output would let the workflow conclude there was nothing to
+    report and pass, so the watcher would quietly stop watching.
+    """
+    wscript = tmp_path / 'wscript'
+    if contents is not None:
+        wscript.write_text(contents)
+    monkeypatch.setattr(checker, 'LOCAL_WSCRIPT', wscript)
+    upstream('1.2.0')
+
+    output = tmp_path / 'github_output'
+    monkeypatch.setenv('GITHUB_OUTPUT', str(output))
+
+    assert checker.main([]) == checker.EXIT_UNREACHABLE
+    assert 'status=error' in output.read_text()
+
+
 def test_an_html_error_page_is_not_mistaken_for_a_wscript(monkeypatch):
     """Fossil serves HTML for its error pages and for documents it recognises.
 

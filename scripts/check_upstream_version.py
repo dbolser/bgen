@@ -65,7 +65,16 @@ def main(argv=None):
     parser.add_argument('--timeout', type=float, default=30)
     args = parser.parse_args(argv)
 
-    local = parse_version(LOCAL_WSCRIPT.read_text())
+    # Reading our own wscript can fail too, and an uncaught traceback here
+    # would exit 1 without writing any output -- which the workflow reads as
+    # 'not moved' and passes, leaving the watcher silently doing nothing.
+    try:
+        local = parse_version(LOCAL_WSCRIPT.read_text())
+    except (OSError, ValueError) as error:
+        print('Could not read the local version from %s: %s' % (LOCAL_WSCRIPT, error),
+              file=sys.stderr)
+        write_github_output(status='error', local='', upstream='')
+        return EXIT_UNREACHABLE
 
     try:
         upstream = fetch_upstream_version(args.url, args.timeout)

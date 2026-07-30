@@ -26,4 +26,4 @@ def bgenix_path():
 
 def run_bgenix():
     """Console-script entry point: replace this process with ``bgenix``."""
-    os.execv(str(bgenix_path()), ['bgenix'] + sys.argv[1:])
+    os.execv(str(bgenix_path()), ['bgenix', *sys.argv[1:]])
