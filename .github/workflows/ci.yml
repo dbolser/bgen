@@ -3,6 +3,8 @@ on:
   pull_request:
   push:
     branches: [ main ]
+    # Tags are handled by publish.yml, which builds, verifies and uploads the
+    # sdist.  Two workflows reacting to the same tag would mean two uploads.
 
 jobs:
   build:
